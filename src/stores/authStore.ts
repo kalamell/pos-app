@@ -27,11 +27,28 @@ export const useAuthStore = create<AuthState>((set) => ({
     return {}
   },
   register: async (email, password, fullName) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email, password,
       options: { data: { full_name: fullName } }
     })
     if (error) return { error: error.message }
+
+    // Create profile + plan (trigger was removed)
+    if (data.user) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email: data.user.email,
+        full_name: fullName,
+        role: 'owner',
+      })
+      await supabase.from('user_plans').upsert({
+        user_id: data.user.id,
+        plan: 'free',
+        max_shops: 1,
+        max_branches: 1,
+        max_menu_items: 30,
+      }, { onConflict: 'user_id' })
+    }
     return {}
   },
   logout: async () => {

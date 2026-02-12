@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
 import { useShopStore } from '@/stores/shopStore'
+import { useMenuStore } from '@/stores/menuStore'
 import { useOrderStore } from '@/stores/orderStore'
 import { formatCurrency } from '@/lib/utils'
 import { Button, Input, Label, Card, Modal, Select } from '@/components/ui'
-import { DollarSign, ShoppingBag, TrendingUp, Clock } from 'lucide-react'
+import { DollarSign, ShoppingBag, TrendingUp, Clock, AlertTriangle } from 'lucide-react'
 
 export default function Dashboard() {
   const { t } = useTranslation()
   const { shops, currentShop, currentBranch, fetchShops, createShop } = useShopStore()
+  const { items, fetchItems } = useMenuStore()
   const { orders, fetchOrders } = useOrderStore()
   const [showCreateShop, setShowCreateShop] = useState(false)
   const [shopForm, setShopForm] = useState({ name: '', slug: '', shop_type: 'restaurant' })
@@ -16,6 +18,9 @@ export default function Dashboard() {
 
   useEffect(() => { fetchShops() }, [])
   useEffect(() => { if (currentBranch) fetchOrders(currentBranch.id) }, [currentBranch])
+  useEffect(() => { if (currentShop) fetchItems(currentShop.id) }, [currentShop])
+
+  const lowStockItems = items.filter((item) => item.track_stock && item.stock_quantity != null && item.stock_quantity <= item.low_stock_alert)
 
   const todayOrders = orders.filter((o) => new Date(o.created_at).toDateString() === new Date().toDateString())
   const todaySales = todayOrders.filter((o) => o.status === 'paid').reduce((sum, o) => sum + Number(o.total), 0)
@@ -49,10 +54,11 @@ export default function Dashboard() {
             <div>
               <Label>{t('dashboard.shopType')}</Label>
               <Select value={shopForm.shop_type} onChange={(e) => setShopForm({ ...shopForm, shop_type: e.target.value })}>
-                <option value="restaurant">Restaurant</option>
-                <option value="cafe">Cafe</option>
-                <option value="bakery">Bakery</option>
-                <option value="buffet">Buffet</option>
+                <option value="restaurant">{t('shop.type.restaurant')}</option>
+                <option value="cafe">{t('shop.type.cafe')}</option>
+                <option value="bakery">{t('shop.type.bakery')}</option>
+                <option value="buffet">{t('shop.type.buffet')}</option>
+                <option value="retail">{t('shop.type.retail')}</option>
               </Select>
             </div>
             <Button type="submit" className="w-full" disabled={creating}>{creating ? t('common.loading') : t('common.save')}</Button>
@@ -85,6 +91,20 @@ export default function Dashboard() {
           </Card>
         ))}
       </div>
+
+      {lowStockItems.length > 0 && (
+        <Card className="p-5 mb-8 border-orange-200 bg-orange-50">
+          <h2 className="font-semibold mb-4 flex items-center gap-2 text-orange-700"><AlertTriangle className="w-5 h-5" /> ⚠️ {t('dashboard.lowStock')}</h2>
+          <div className="space-y-2">
+            {lowStockItems.map((item) => (
+              <div key={item.id} className="flex items-center justify-between py-2 border-b border-orange-200 last:border-0">
+                <span className="font-medium">{item.name}</span>
+                <span className="text-sm text-orange-700 font-semibold">{t('menu.stock')}: {item.stock_quantity}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <Card className="p-5">
         <h2 className="font-semibold mb-4 flex items-center gap-2"><Clock className="w-5 h-5" /> {t('dashboard.recentOrders')}</h2>
@@ -121,10 +141,11 @@ export default function Dashboard() {
           <div>
             <Label>{t('dashboard.shopType')}</Label>
             <Select value={shopForm.shop_type} onChange={(e) => setShopForm({ ...shopForm, shop_type: e.target.value })}>
-              <option value="restaurant">Restaurant</option>
-              <option value="cafe">Cafe</option>
-              <option value="bakery">Bakery</option>
-              <option value="buffet">Buffet</option>
+              <option value="restaurant">{t('shop.type.restaurant')}</option>
+              <option value="cafe">{t('shop.type.cafe')}</option>
+              <option value="bakery">{t('shop.type.bakery')}</option>
+              <option value="buffet">{t('shop.type.buffet')}</option>
+              <option value="retail">{t('shop.type.retail')}</option>
             </Select>
           </div>
           <Button type="submit" className="w-full" disabled={creating}>{creating ? t('common.loading') : t('common.save')}</Button>

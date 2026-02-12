@@ -13,6 +13,7 @@ import BranchPage from '@/pages/BranchPage'
 import OrdersPage from '@/pages/OrdersPage'
 import MenuPublicPage from '@/pages/MenuPublicPage'
 import AdminPage from '@/pages/AdminPage'
+import SettingsPage from '@/pages/SettingsPage'
 
 function HomeRedirect() {
   const { user, loading } = useAuthStore()
@@ -39,7 +40,7 @@ export default function App() {
           <Route path="/branches" element={<BranchPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/reports" element={<div className="text-center text-gray-500 py-20">Reports - Coming Soon</div>} />
-          <Route path="/settings" element={<div className="text-center text-gray-500 py-20">Settings - Coming Soon</div>} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<AdminPage />} />
         </Route>
       </Routes>

@@ -15,7 +15,9 @@ export default function MenuPage() {
   const [catName, setCatName] = useState('')
   const [showItemModal, setShowItemModal] = useState(false)
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
-  const [itemForm, setItemForm] = useState({ name: '', price: '', description: '', image_url: '', category_id: '', is_available: true })
+  const [itemForm, setItemForm] = useState({ name: '', price: '', description: '', image_url: '', category_id: '', is_available: true, barcode: '', sku: '', stock_quantity: '', track_stock: false, low_stock_alert: '5' })
+
+  const isRetail = currentShop?.shop_type === 'retail'
 
   useEffect(() => {
     if (currentShop) {
@@ -35,10 +37,10 @@ export default function MenuPage() {
   const openItemModal = (item?: MenuItem) => {
     if (item) {
       setEditingItem(item)
-      setItemForm({ name: item.name, price: String(item.price), description: item.description || '', image_url: item.image_url || '', category_id: item.category_id || '', is_available: item.is_available })
+      setItemForm({ name: item.name, price: String(item.price), description: item.description || '', image_url: item.image_url || '', category_id: item.category_id || '', is_available: item.is_available, barcode: item.barcode || '', sku: item.sku || '', stock_quantity: item.stock_quantity != null ? String(item.stock_quantity) : '', track_stock: item.track_stock || false, low_stock_alert: String(item.low_stock_alert || 5) })
     } else {
       setEditingItem(null)
-      setItemForm({ name: '', price: '', description: '', image_url: '', category_id: categories[0]?.id || '', is_available: true })
+      setItemForm({ name: '', price: '', description: '', image_url: '', category_id: categories[0]?.id || '', is_available: true, barcode: '', sku: '', stock_quantity: '', track_stock: false, low_stock_alert: '5' })
     }
     setShowItemModal(true)
   }
@@ -46,7 +48,7 @@ export default function MenuPage() {
   const handleSaveItem = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!currentShop) return
-    const data = { name: itemForm.name, price: Number(itemForm.price), description: itemForm.description || null, image_url: itemForm.image_url || null, category_id: itemForm.category_id || null, is_available: itemForm.is_available }
+    const data = { name: itemForm.name, price: Number(itemForm.price), description: itemForm.description || null, image_url: itemForm.image_url || null, category_id: itemForm.category_id || null, is_available: itemForm.is_available, barcode: itemForm.barcode || null, sku: itemForm.sku || null, stock_quantity: itemForm.stock_quantity ? Number(itemForm.stock_quantity) : null, track_stock: itemForm.track_stock, low_stock_alert: Number(itemForm.low_stock_alert) || 5 }
     if (editingItem) {
       await updateItem(editingItem.id, data)
       await fetchItems(currentShop.id)
@@ -151,6 +153,34 @@ export default function MenuPage() {
             <Label>{t('image.upload')}</Label>
             <ImageUpload value={itemForm.image_url || null} onChange={(url) => setItemForm({ ...itemForm, image_url: url || '' })} shopId={currentShop?.id || ''} />
           </div>
+          {isRetail && (
+            <>
+              <div>
+                <Label>{t('menu.barcode')}</Label>
+                <Input value={itemForm.barcode} onChange={(e) => setItemForm({ ...itemForm, barcode: e.target.value })} placeholder="EAN-13, UPC..." />
+              </div>
+              <div>
+                <Label>{t('menu.sku')}</Label>
+                <Input value={itemForm.sku} onChange={(e) => setItemForm({ ...itemForm, sku: e.target.value })} />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" checked={itemForm.track_stock} onChange={(e) => setItemForm({ ...itemForm, track_stock: e.target.checked })} id="trackStock" />
+                <label htmlFor="trackStock" className="text-sm">{t('menu.trackStock')}</label>
+              </div>
+              {itemForm.track_stock && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>{t('menu.stock')}</Label>
+                    <Input type="number" value={itemForm.stock_quantity} onChange={(e) => setItemForm({ ...itemForm, stock_quantity: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>{t('menu.lowStockAlert')}</Label>
+                    <Input type="number" value={itemForm.low_stock_alert} onChange={(e) => setItemForm({ ...itemForm, low_stock_alert: e.target.value })} />
+                  </div>
+                </div>
+              )}
+            </>
+          )}
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={itemForm.is_available} onChange={(e) => setItemForm({ ...itemForm, is_available: e.target.checked })} id="available" />
             <label htmlFor="available" className="text-sm">{t('menu.available')}</label>

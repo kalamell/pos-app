@@ -21,6 +21,11 @@ export interface MenuItem {
   is_available: boolean
   sort_order: number
   options: unknown[]
+  barcode: string | null
+  sku: string | null
+  stock_quantity: number | null
+  track_stock: boolean
+  low_stock_alert: number
   created_at: string
 }
 

@@ -92,6 +92,12 @@ export const en = {
   'dashboard.shopName': 'Shop Name',
   'dashboard.shopSlug': 'Slug (URL)',
   'dashboard.shopType': 'Shop Type',
+  'dashboard.lowStock': 'Low Stock Alert',
+  'shop.type.restaurant': 'Restaurant',
+  'shop.type.cafe': 'Cafe',
+  'shop.type.bakery': 'Bakery',
+  'shop.type.buffet': 'Buffet',
+  'shop.type.retail': 'Retail Shop',
 
   // POS
   'pos.title': 'Point of Sale',
@@ -115,6 +121,7 @@ export const en = {
   'pos.note': 'Note',
   'pos.orderSuccess': 'Order saved successfully',
   'pos.noMenu': 'No menu items yet',
+  'pos.scanBarcode': 'Scan or enter barcode...',
 
   // Menu Management
   'menu.title': 'Manage Menu',
@@ -135,6 +142,11 @@ export const en = {
   'menu.confirmDelete': 'Confirm delete?',
   'menu.noCategories': 'No categories yet',
   'menu.noItems': 'No items yet',
+  'menu.barcode': 'Barcode',
+  'menu.sku': 'SKU',
+  'menu.stock': 'Stock',
+  'menu.trackStock': 'Track Stock',
+  'menu.lowStockAlert': 'Low Stock Alert',
 
   // Branch
   'branch.title': 'Manage Branches',

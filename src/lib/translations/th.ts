@@ -92,6 +92,12 @@ export const th = {
   'dashboard.shopName': 'ชื่อร้าน',
   'dashboard.shopSlug': 'Slug (URL)',
   'dashboard.shopType': 'ประเภทร้าน',
+  'dashboard.lowStock': 'สินค้าใกล้หมด',
+  'shop.type.restaurant': 'ร้านอาหาร',
+  'shop.type.cafe': 'คาเฟ่',
+  'shop.type.bakery': 'เบเกอรี่',
+  'shop.type.buffet': 'บุฟเฟ่ต์',
+  'shop.type.retail': 'ร้านค้าปลีก',
 
   // POS
   'pos.title': 'ขายสินค้า',
@@ -115,6 +121,7 @@ export const th = {
   'pos.note': 'หมายเหตุ',
   'pos.orderSuccess': 'บันทึกออเดอร์สำเร็จ',
   'pos.noMenu': 'ยังไม่มีเมนู',
+  'pos.scanBarcode': 'สแกนหรือพิมพ์บาร์โค้ด...',
 
   // Menu Management
   'menu.title': 'จัดการเมนู',
@@ -135,6 +142,11 @@ export const th = {
   'menu.confirmDelete': 'ยืนยันการลบ?',
   'menu.noCategories': 'ยังไม่มีหมวดหมู่',
   'menu.noItems': 'ยังไม่มีเมนู',
+  'menu.barcode': 'บาร์โค้ด',
+  'menu.sku': 'รหัสสินค้า',
+  'menu.stock': 'สต๊อก',
+  'menu.trackStock': 'ติดตามสต๊อก',
+  'menu.lowStockAlert': 'แจ้งเตือนของน้อย',
 
   // Branch
   'branch.title': 'จัดการสาขา',

@@ -188,6 +188,15 @@ export const th = {
   'admin.markRead': 'อ่านแล้ว',
   'admin.noInquiries': 'ยังไม่มีข้อความ',
 
+  // Image Upload
+  'image.upload': 'อัปโหลดรูป',
+  'image.dragDrop': 'ลากไฟล์มาวางหรือคลิกเพื่ออัปโหลด',
+  'image.compressing': 'กำลังบีบอัด...',
+  'image.uploading': 'กำลังอัปโหลด...',
+  'image.maxSize': 'ไม่เกิน 5MB, JPG/PNG/WebP',
+  'image.remove': 'ลบรูป',
+  'image.change': 'เปลี่ยนรูป',
+
   // Common
   'common.save': 'บันทึก',
   'common.cancel': 'ยกเลิก',

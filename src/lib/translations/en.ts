@@ -188,6 +188,15 @@ export const en = {
   'admin.markRead': 'Mark Read',
   'admin.noInquiries': 'No inquiries yet',
 
+  // Image Upload
+  'image.upload': 'Upload Image',
+  'image.dragDrop': 'Drag & drop or click to upload',
+  'image.compressing': 'Compressing...',
+  'image.uploading': 'Uploading...',
+  'image.maxSize': 'Max 5MB, JPG/PNG/WebP',
+  'image.remove': 'Remove Image',
+  'image.change': 'Change Image',
+
   // Common
   'common.save': 'Save',
   'common.cancel': 'Cancel',

@@ -4,6 +4,7 @@ import { useShopStore } from '@/stores/shopStore'
 import { useMenuStore, type MenuItem } from '@/stores/menuStore'
 import { formatCurrency } from '@/lib/utils'
 import { Button, Input, Label, Card, Modal, Select, Badge, Textarea } from '@/components/ui'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { Plus, Pencil, Trash2, Tag } from 'lucide-react'
 
 export default function MenuPage() {
@@ -147,8 +148,8 @@ export default function MenuPage() {
             <Textarea value={itemForm.description} onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })} rows={2} />
           </div>
           <div>
-            <Label>{t('menu.imageUrl')}</Label>
-            <Input value={itemForm.image_url} onChange={(e) => setItemForm({ ...itemForm, image_url: e.target.value })} />
+            <Label>{t('image.upload')}</Label>
+            <ImageUpload value={itemForm.image_url || null} onChange={(url) => setItemForm({ ...itemForm, image_url: url || '' })} shopId={currentShop?.id || ''} />
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={itemForm.is_available} onChange={(e) => setItemForm({ ...itemForm, is_available: e.target.checked })} id="available" />

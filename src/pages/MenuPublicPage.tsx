@@ -150,7 +150,13 @@ export default function MenuPublicPage() {
       <div className="max-w-2xl mx-auto px-4 py-4 space-y-3">
         {filteredItems.map((item) => (
           <Card key={item.id} className="p-4 flex gap-4">
-            {item.image_url && <img src={item.image_url} alt={item.name} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />}
+            {item.image_url ? (
+              <img src={item.image_url} alt={item.name} className="w-20 h-20 rounded-lg object-cover flex-shrink-0" />
+            ) : (
+              <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-2xl">🍽️</span>
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold">{item.name}</h3>
               {item.description && <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>}

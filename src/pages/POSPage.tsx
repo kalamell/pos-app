@@ -7,8 +7,7 @@ import { formatCurrency } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Search, Plus, Minus, Trash2, X } from 'lucide-react'
+import { Search, Plus, Minus, Trash2, X, CheckCircle, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface Table {
@@ -32,6 +31,9 @@ export default function POSPage() {
   const [receivedAmount, setReceivedAmount] = useState('')
   const [showPayment, setShowPayment] = useState(false)
   const [note, setNote] = useState('')
+  const [processing, setProcessing] = useState(false)
+  const [error, setError] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => {
     if (currentShop) {
@@ -59,32 +61,49 @@ export default function POSPage() {
   const change = paymentMethod === 'cash' && receivedAmount ? Number(receivedAmount) - total : 0
 
   const handlePay = async (method: string) => {
-    if (!currentBranch) return
-    setPaymentMethod(method)
+    if (!currentBranch || cart.length === 0) return
+    setError('')
     if (method === 'cash') {
+      setPaymentMethod('cash')
       setShowPayment(true)
       return
     }
+    // transfer / card → process immediately
     await processPayment(method)
   }
 
   const processPayment = async (method: string) => {
     if (!currentBranch) return
-    await createOrder({
-      branch_id: currentBranch.id,
-      table_id: selectedTable,
-      order_type: orderType,
-      items: cart,
-      discount,
-      payment_method: method,
-      note,
-    })
-    setShowPayment(false)
-    setPaymentMethod(null)
-    setReceivedAmount('')
-    setDiscount(0)
-    setNote('')
-    setSelectedTable(null)
+    setProcessing(true)
+    setError('')
+    try {
+      const result = await createOrder({
+        branch_id: currentBranch.id,
+        table_id: selectedTable,
+        order_type: orderType,
+        items: cart,
+        discount,
+        payment_method: method,
+        note,
+      })
+      if (result.error) {
+        setError(result.error)
+        setProcessing(false)
+        return
+      }
+      // Success!
+      setShowPayment(false)
+      setPaymentMethod(null)
+      setReceivedAmount('')
+      setDiscount(0)
+      setNote('')
+      setSelectedTable(null)
+      setShowSuccess(true)
+      setTimeout(() => setShowSuccess(false), 3000)
+    } catch (err) {
+      setError((err as Error).message || 'Unknown error')
+    }
+    setProcessing(false)
   }
 
   return (
@@ -111,11 +130,11 @@ export default function POSPage() {
 
         {/* Category tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-          <button onClick={() => setSelectedCategory(null)} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ${!selectedCategory ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
+          <button onClick={() => setSelectedCategory(null)} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ${!selectedCategory ? 'bg-primary text-primary-foreground' : 'bg-gray-100 text-gray-700'}`}>
             {t('pos.allCategories')}
           </button>
           {categories.map((c) => (
-            <button key={c.id} onClick={() => setSelectedCategory(c.id)} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ${selectedCategory === c.id ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'}`}>
+            <button key={c.id} onClick={() => setSelectedCategory(c.id)} className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ${selectedCategory === c.id ? 'bg-primary text-primary-foreground' : 'bg-gray-100 text-gray-700'}`}>
               {c.name}
             </button>
           ))}
@@ -129,10 +148,14 @@ export default function POSPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
               {filteredItems.map((item) => (
                 <button key={item.id} onClick={() => addToCart({ menu_item_id: item.id, name: item.name, price: Number(item.price), quantity: 1, note: '', options: {} })}
-                  className="bg-white rounded-xl border border-gray-200 p-3 text-left hover:border-primary-300 hover:shadow-sm transition-all">
-                  {item.image_url && <img src={item.image_url} alt={item.name} className="w-full h-24 object-cover rounded-lg mb-2" />}
+                  className="bg-white rounded-xl border border-gray-200 p-3 text-left hover:border-primary/50 hover:shadow-sm transition-all">
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} className="w-full h-24 object-cover rounded-lg mb-2" />
+                  ) : (
+                    <div className="w-full h-24 bg-gray-100 rounded-lg mb-2 flex items-center justify-center text-3xl">🍽️</div>
+                  )}
                   <p className="font-medium text-sm truncate">{item.name}</p>
-                  <p className="text-primary-600 font-bold text-sm">{formatCurrency(Number(item.price))}</p>
+                  <p className="text-primary font-bold text-sm">{formatCurrency(Number(item.price))}</p>
                 </button>
               ))}
             </div>
@@ -185,12 +208,25 @@ export default function POSPage() {
           </div>
           <div className="flex items-center justify-between font-bold text-lg">
             <span>{t('pos.total')}</span>
-            <span className="text-primary-600">{formatCurrency(total)}</span>
+            <span className="text-primary">{formatCurrency(total)}</span>
           </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
+              ❌ {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-2">
-            <Button onClick={() => handlePay('cash')} disabled={cart.length === 0} variant="secondary">{t('pos.cash')}</Button>
-            <Button onClick={() => handlePay('transfer')} disabled={cart.length === 0} variant="secondary">{t('pos.transfer')}</Button>
-            <Button onClick={() => handlePay('card')} disabled={cart.length === 0} variant="secondary">{t('pos.card')}</Button>
+            <Button onClick={() => handlePay('cash')} disabled={cart.length === 0 || processing} variant="secondary">
+              {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : `💵 ${t('pos.cash')}`}
+            </Button>
+            <Button onClick={() => handlePay('transfer')} disabled={cart.length === 0 || processing} variant="secondary">
+              {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : `📱 ${t('pos.transfer')}`}
+            </Button>
+            <Button onClick={() => handlePay('card')} disabled={cart.length === 0 || processing} variant="secondary">
+              {processing ? <Loader2 className="w-4 h-4 animate-spin" /> : `💳 ${t('pos.card')}`}
+            </Button>
           </div>
         </div>
       </Card>
@@ -198,10 +234,10 @@ export default function POSPage() {
       {/* Cash payment modal */}
       {showPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setShowPayment(false)} />
-          <Card className="relative w-full max-w-sm mx-4 p-6">
-            <button onClick={() => setShowPayment(false)} className="absolute top-3 right-3"><X className="w-5 h-5" /></button>
-            <h3 className="text-lg font-bold mb-4">{t('pos.cash')}</h3>
+          <div className="fixed inset-0 bg-black/50" onClick={() => !processing && setShowPayment(false)} />
+          <Card className="relative w-full max-w-sm mx-4 p-6 z-10">
+            <button onClick={() => !processing && setShowPayment(false)} className="absolute top-3 right-3"><X className="w-5 h-5" /></button>
+            <h3 className="text-lg font-bold mb-4">💵 {t('pos.cash')}</h3>
             <div className="space-y-4">
               <div className="flex justify-between font-bold text-lg">
                 <span>{t('pos.total')}</span>
@@ -212,14 +248,31 @@ export default function POSPage() {
                 <Input type="number" value={receivedAmount} onChange={(e) => setReceivedAmount(e.target.value)} autoFocus className="text-2xl text-center font-bold" />
               </div>
               {Number(receivedAmount) >= total && (
-                <div className="flex justify-between text-lg">
+                <div className="flex justify-between items-center text-lg">
                   <span>{t('pos.change')}</span>
                   <span className="text-lg font-bold text-green-600 bg-green-50 px-4 py-1 rounded-full">{formatCurrency(change)}</span>
                 </div>
               )}
-              <Button onClick={() => processPayment('cash')} disabled={Number(receivedAmount) < total} className="w-full" size="lg">{t('pos.pay')}</Button>
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-sm text-red-600">❌ {error}</div>
+              )}
+              <Button onClick={() => processPayment('cash')} disabled={Number(receivedAmount) < total || processing} className="w-full" size="lg">
+                {processing ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+                {processing ? t('common.loading') : t('pos.pay')}
+              </Button>
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* Success toast */}
+      {showSuccess && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-in slide-in-from-right">
+          <CheckCircle className="w-6 h-6" />
+          <div>
+            <p className="font-bold">✅ สำเร็จ!</p>
+            <p className="text-sm">บันทึกออเดอร์เรียบร้อย</p>
+          </div>
         </div>
       )}
     </div>

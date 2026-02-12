@@ -4,7 +4,10 @@ import { useShopStore } from '@/stores/shopStore'
 import { useMenuStore } from '@/stores/menuStore'
 import { useOrderStore } from '@/stores/orderStore'
 import { formatCurrency } from '@/lib/utils'
-import { Button, Input, Card, Badge } from '@/components/ui'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Search, Plus, Minus, Trash2, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -211,7 +214,7 @@ export default function POSPage() {
               {Number(receivedAmount) >= total && (
                 <div className="flex justify-between text-lg">
                   <span>{t('pos.change')}</span>
-                  <Badge variant="success" className="text-lg px-4 py-1">{formatCurrency(change)}</Badge>
+                  <span className="text-lg font-bold text-green-600 bg-green-50 px-4 py-1 rounded-full">{formatCurrency(change)}</span>
                 </div>
               )}
               <Button onClick={() => processPayment('cash')} disabled={Number(receivedAmount) < total} className="w-full" size="lg">{t('pos.pay')}</Button>
